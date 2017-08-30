@@ -31,7 +31,7 @@ describe('sketch: default exports', function () {
   it('should return a state descriptor', function () {
     assert.equal(typeof state, 'object', 'state is not an object')
     assert.equal(typeof state.initialState, 'object', 'initialState is missing')
-    assert.equal(typeof state.Types, 'object', 'Types is missing')
+    assert.equal(typeof state.ActionTypes, 'object', 'ActionTypes is missing')
     assert.equal(typeof state.Actions, 'object', 'Actions is missing')
     assert.equal(typeof state.reducer, 'function', 'reducer is missing')
   })
@@ -39,11 +39,11 @@ describe('sketch: default exports', function () {
 
 describe('sketch.types', function () {
   it('should generate a type definition object for an action name list.', function () {
-    var types = sketch.types('Prefix', ['action1', 'action2'])
+    var types = sketch.actionTypes('Prefix', ['action1', 'action2'])
     assert.equal(typeof types, 'object')
   })
   it('should generate a type definition object for an action definition object.', function () {
-    var types = sketch.types('Prefix', {
+    var types = sketch.actionTypes('Prefix', {
       action1: null,
       action2: 'payload',
       action3: ['payload'],

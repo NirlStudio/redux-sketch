@@ -5,16 +5,16 @@ var plan = require('redux-action-plan')
 function createSketching (types) {
   var sketching = Object.create(null)
   // Types: mapping of (action-name, action-type-value)
-  sketching.Types = Object.create(null)
+  sketching.ActionTypes = Object.create(null)
   var payloads = {}
   var names = Object.getOwnPropertyNames(types)
   for (var i = 0; i < names.length; i++) {
     var name = names[i]
     var type = types[name]
     if (typeof type === 'string') {
-      sketching.Types[name] = type // no named payload
+      sketching.ActionTypes[name] = type // no named payload
     } else if (type.length) {
-      sketching.Types[name] = type[0]
+      sketching.ActionTypes[name] = type[0]
       if (type.length > 2) {
         // multiple named payload fields.
         payloads[name] = type.slice(1)
@@ -26,7 +26,7 @@ function createSketching (types) {
   }
 
   // create the intermediate action plan
-  sketching.actions = plan(sketching.Types)
+  sketching.actions = plan(sketching.ActionTypes)
 
   // Actions: action creators
   sketching.Actions = sketching.actions(payloads)
@@ -84,7 +84,7 @@ function sketch (types, state) {
   return sketching
 }
 
-sketch.types = function (prefix, actions) {
+sketch.actionTypes = function (prefix, actions) {
   var names
   if (actions.length) {
     names = actions
