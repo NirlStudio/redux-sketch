@@ -7,7 +7,8 @@ describe('sketch: default exports', function () {
     action1: 'Prefix/action1',
     action2: 'Prefix/action2'
   }, {
-    STATE: null,
+    CONST: null,
+    STATE: handler,
     state0: {
       value: 'initial-state1'
     },

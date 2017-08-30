@@ -52,10 +52,14 @@ function createReducers (sketching, state) {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
     var substate = state[key]
-    if (!substate) {
+    if (!substate) { // a constant state.
       sketching.initialState[key] = null
       reducers[key] = sketching.actions.nop()
-    } else {
+    } else if (typeof substate === 'function') {
+      // a customized reducer is provided.
+      sketching.initialState[key] = null
+      reducers[key] = substate
+    } else { // a descriptor object
       var initValue = typeof substate.value === 'undefined' ? null : substate.value
       sketching.initialState[key] = initValue
       reducers[key] = typeof substate.bind === 'function'
