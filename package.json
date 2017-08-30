@@ -1,0 +1,31 @@
+{
+  "name": "redux-sketch",
+  "version": "0.1.0",
+  "description": "A redux state sketcher to generate a state definition with initial state, action types, action creators and reducer.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "state",
+    "action-creator",
+    "reducer"
+  ],
+  "author": "Leevi Li",
+  "license": "BSD-2-Clause",
+  "standard": {
+    "globals": [
+      "describe",
+      "it"
+    ]
+  },
+  "dependencies": {
+    "redux": "^3.7.2",
+    "redux-action-plan": "^0.4.1"
+  },
+  "devDependencies": {
+    "mocha": "^3.5.0"
+  }
+}
