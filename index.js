@@ -1,26 +1,27 @@
 'use strict'
+
 var redux = require('redux')
 var plan = require('redux-action-plan')
 
-function createSketching (types) {
+function createSketching (actions) {
   var sketching = Object.create(null)
   // Types: mapping of (action-name, action-type-value)
   sketching.ActionTypes = Object.create(null)
   var payloads = {}
-  var names = Object.getOwnPropertyNames(types)
+  var names = Object.getOwnPropertyNames(actions)
   for (var i = 0; i < names.length; i++) {
     var name = names[i]
-    var type = types[name]
-    if (typeof type === 'string') {
-      sketching.ActionTypes[name] = type // no named payload
-    } else if (type.length) {
-      sketching.ActionTypes[name] = type[0]
-      if (type.length > 2) {
+    var action = actions[name]
+    if (typeof action === 'string') {
+      sketching.ActionTypes[name] = action // no named payload
+    } else if (action.length) { // might be a non-empty array
+      sketching.ActionTypes[name] = action[0]
+      if (action.length > 2) {
         // multiple named payload fields.
-        payloads[name] = type.slice(1)
-      } else if (type.length > 1) {
+        payloads[name] = action.slice(1)
+      } else if (action.length > 1) {
         // one payload descriptor, but it may be an array.
-        payloads[name] = type[1]
+        payloads[name] = action[1]
       }
     }
   }
@@ -70,9 +71,9 @@ function createReducers (sketching, state) {
   return reducers
 }
 
-function sketch (types, state) {
+function sketch (actions, state) {
   // create sketching of action types and action creators.
-  var sketching = createSketching(types)
+  var sketching = createSketching(actions)
   // initialState
   sketching.initialState = Object.create(null)
   // reducer
@@ -84,7 +85,7 @@ function sketch (types, state) {
   return sketching
 }
 
-sketch.actionTypes = function (prefix, actions) {
+sketch.actions = function (prefix, actions) {
   var names
   if (actions.length) {
     names = actions
@@ -101,6 +102,24 @@ sketch.actionTypes = function (prefix, actions) {
     }
   }
   return types
+}
+
+sketch.combine = function (states) {
+  // merge initial state and reducers
+  var initialState = Object.create(null)
+  var reducers = {}
+  var keys = Object.getOwnPropertyNames(states)
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i]
+    initialState[key] = states[key].initialState
+    reducers[key] = states[key].reducer
+  }
+  // assembly a new composite state.
+  var combinedState = Object.create(null)
+  combinedState.States = states
+  combinedState.initialState = initialState
+  combinedState.reducer = redux.combineReducers(reducers)
+  return combinedState
 }
 
 module.exports = sketch

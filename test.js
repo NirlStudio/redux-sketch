@@ -1,8 +1,11 @@
+'use strict'
+
 var assert = require('assert')
 var sketch = require('./index')
 
+var handler = function (state) { return state }
+
 describe('sketch: default exports', function () {
-  var handler = function (state) { return state }
   var state = sketch({
     action1: 'Prefix/action1',
     action2: 'Prefix/action2'
@@ -37,18 +40,59 @@ describe('sketch: default exports', function () {
   })
 })
 
-describe('sketch.types', function () {
+describe('sketch.actions', function () {
   it('should generate a type definition object for an action name list.', function () {
-    var types = sketch.actionTypes('Prefix', ['action1', 'action2'])
-    assert.equal(typeof types, 'object')
+    var actions = sketch.actions('Prefix', ['action1', 'action2'])
+    assert.equal(typeof actions, 'object')
   })
   it('should generate a type definition object for an action definition object.', function () {
-    var types = sketch.actionTypes('Prefix', {
+    var types = sketch.actions('Prefix', {
       action1: null,
       action2: 'payload',
       action3: ['payload'],
       action4: ['payload1', 'payload2']
     })
     assert.equal(typeof types, 'object')
+  })
+})
+
+describe('sketch.combine', function () {
+  it('should generate a combined state object from one or more substates.', function () {
+    var state1 = sketch({
+      action1: 'state1/action1',
+      action2: 'state1/action2'
+    }, {
+      state1: {
+        value: 'initial-state1',
+        bind: handler
+      },
+      state2: {
+        value: 'initial-state2',
+        bind: ['action1', 'action2', handler]
+      }
+    })
+    var state2 = sketch({
+      action1: 'state2/action1',
+      action2: 'state2/action2'
+    }, {
+      state1: {
+        value: 'initial-state1',
+        bind: handler
+      },
+      state2: {
+        value: 'initial-state2',
+        bind: ['action1', 'action2', handler]
+      }
+    })
+    var state = sketch.combine({
+      state1: state1,
+      state2: state2
+    })
+    assert.equal(typeof state, 'object', 'state is not an object')
+    assert.equal(typeof state.States, 'object', 'initialState is invalid')
+    assert.equal(state.States.state1, state1, 'sub-state1 is invalid')
+    assert.equal(state.States.state2, state2, 'sub-state2 is invalid')
+    assert.equal(typeof state.initialState, 'object', 'initialState is invalid')
+    assert.equal(typeof state.reducer, 'function', 'reducer is invalid')
   })
 })
