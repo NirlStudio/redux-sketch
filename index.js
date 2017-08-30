@@ -60,7 +60,13 @@ function createReducers (sketching, state) {
       // a customized reducer is provided.
       sketching.initialValue[key] = null
       reducers[key] = substate
-    } else { // a descriptor object
+    } else if (
+      typeof substate.initialValue !== 'undefined' &&
+      typeof substate.reducer === 'function'
+    ) { // a nested state object.
+      sketching.initialValue[key] = substate.initialValue
+      reducers[key] = substate.reducer
+    } else { // take as a descriptor object
       var initValue = typeof substate.value === 'undefined' ? null : substate.value
       sketching.initialValue[key] = initValue
       reducers[key] = typeof substate.bind === 'function'

@@ -29,6 +29,10 @@ describe('sketch: default exports', function () {
         action1: handler,
         action2: handler
       }
+    },
+    state4: {
+      initialValue: 'initial-state4',
+      reducer: handler
     }
   })
   it('should return a state descriptor', function () {
