@@ -54,15 +54,15 @@ function createReducers (sketching, state) {
     var key = keys[i]
     var substate = state[key]
     if (!substate) { // a constant state.
-      sketching.initialState[key] = null
+      sketching.initialValue[key] = null
       reducers[key] = sketching.actions.nop()
     } else if (typeof substate === 'function') {
       // a customized reducer is provided.
-      sketching.initialState[key] = null
+      sketching.initialValue[key] = null
       reducers[key] = substate
     } else { // a descriptor object
       var initValue = typeof substate.value === 'undefined' ? null : substate.value
-      sketching.initialState[key] = initValue
+      sketching.initialValue[key] = initValue
       reducers[key] = typeof substate.bind === 'function'
         ? substate.bind // a customized reducer
         : createReducer(sketching.actions, initValue, substate.bind)
@@ -74,8 +74,8 @@ function createReducers (sketching, state) {
 function sketch (actions, state) {
   // create sketching of action types and action creators.
   var sketching = createSketching(actions)
-  // initialState
-  sketching.initialState = Object.create(null)
+  // initialValue
+  sketching.initialValue = Object.create(null)
   // reducer
   var reducers = createReducers(sketching, state)
   // create final reducer
@@ -106,18 +106,18 @@ sketch.actions = function (prefix, actions) {
 
 sketch.combine = function (states) {
   // merge initial state and reducers
-  var initialState = Object.create(null)
+  var initialValue = Object.create(null)
   var reducers = {}
   var keys = Object.getOwnPropertyNames(states)
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
-    initialState[key] = states[key].initialState
+    initialValue[key] = states[key].initialValue
     reducers[key] = states[key].reducer
   }
   // assembly a new composite state.
   var combinedState = Object.create(null)
   combinedState.States = states
-  combinedState.initialState = initialState
+  combinedState.initialValue = initialValue
   combinedState.reducer = redux.combineReducers(reducers)
   return combinedState
 }

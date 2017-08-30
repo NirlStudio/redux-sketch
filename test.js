@@ -33,7 +33,7 @@ describe('sketch: default exports', function () {
   })
   it('should return a state descriptor', function () {
     assert.equal(typeof state, 'object', 'state is not an object')
-    assert.equal(typeof state.initialState, 'object', 'initialState is missing')
+    assert.equal(typeof state.initialValue, 'object', 'initialValue is missing')
     assert.equal(typeof state.ActionTypes, 'object', 'ActionTypes is missing')
     assert.equal(typeof state.Actions, 'object', 'Actions is missing')
     assert.equal(typeof state.reducer, 'function', 'reducer is missing')
@@ -89,10 +89,10 @@ describe('sketch.combine', function () {
       state2: state2
     })
     assert.equal(typeof state, 'object', 'state is not an object')
-    assert.equal(typeof state.States, 'object', 'initialState is invalid')
+    assert.equal(typeof state.States, 'object', 'initialValue is invalid')
     assert.equal(state.States.state1, state1, 'sub-state1 is invalid')
     assert.equal(state.States.state2, state2, 'sub-state2 is invalid')
-    assert.equal(typeof state.initialState, 'object', 'initialState is invalid')
+    assert.equal(typeof state.initialValue, 'object', 'initialValue is invalid')
     assert.equal(typeof state.reducer, 'function', 'reducer is invalid')
   })
 })
