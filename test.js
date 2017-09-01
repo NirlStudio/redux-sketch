@@ -8,7 +8,10 @@ var handler = function (state) { return state }
 describe('sketch: default exports', function () {
   var state = sketch({
     action1: 'Prefix/action1',
-    action2: 'Prefix/action2'
+    action2: ['Prefix/action2'],
+    action3: ['Prefix/action3', 'payload'],
+    action4: ['Prefix/action4', ['payload']],
+    action5: ['Prefix/action5', ['payload1', 'payload2']]
   }, {
     CONST: null,
     STATE: handler,

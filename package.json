@@ -1,10 +1,14 @@
 {
   "name": "redux-sketch",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A redux state sketcher to generate a state definition with initial state, action types, action creators and reducer.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NirlStudio/redux-sketch.git"
   },
   "keywords": [
     "react",
@@ -21,6 +25,10 @@
       "it"
     ]
   },
+  "bugs": {
+    "url": "https://github.com/NirlStudio/redux-sketch/issues"
+  },
+  "homepage": "https://github.com/NirlStudio/redux-sketch#readme",
   "dependencies": {
     "redux": "^3.7.2",
     "redux-action-plan": "^0.4.1"
