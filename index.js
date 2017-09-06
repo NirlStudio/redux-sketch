@@ -14,6 +14,9 @@ function createSketching (actions) {
     var action = actions[name]
     if (typeof action === 'string') {
       sketching.ActionTypes[name] = action // no named payload
+    } else if (typeof action === 'function') {
+      // an anonymous side-effecting action.
+      payloads[name] = action
     } else if (action.length) { // might be a non-empty array
       sketching.ActionTypes[name] = action[0]
       if (action.length > 2) {
@@ -27,10 +30,10 @@ function createSketching (actions) {
   }
 
   // create the intermediate action plan
-  sketching.actions = plan(sketching.ActionTypes)
+  sketching.actionPlan = plan(sketching.ActionTypes)
 
   // Actions: action creators
-  sketching.Actions = sketching.actions(payloads)
+  sketching.Actions = sketching.actionPlan(payloads)
   return sketching
 }
 
@@ -55,7 +58,7 @@ function createReducers (sketching, state) {
     var substate = state[key]
     if (!substate) { // a constant state.
       sketching.initialValue[key] = null
-      reducers[key] = sketching.actions.nop()
+      reducers[key] = sketching.actionPlan.nop()
     } else if (typeof substate === 'function') {
       // a customized reducer is provided.
       sketching.initialValue[key] = null
@@ -71,7 +74,7 @@ function createReducers (sketching, state) {
       sketching.initialValue[key] = initValue
       reducers[key] = typeof substate.bind === 'function'
         ? substate.bind // a customized reducer
-        : createReducer(sketching.actions, initValue, substate.bind)
+        : createReducer(sketching.actionPlan, initValue, substate.bind)
     }
   }
   return reducers
@@ -86,8 +89,6 @@ function sketch (actions, state) {
   var reducers = createReducers(sketching, state)
   // create final reducer
   sketching.reducer = redux.combineReducers(reducers)
-  // remove action plan
-  delete sketching.actions
   return sketching
 }
 

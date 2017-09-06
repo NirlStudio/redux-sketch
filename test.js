@@ -3,7 +3,8 @@
 var assert = require('assert')
 var sketch = require('./index')
 
-var handler = function (state) { return state }
+var reducer = function (state, action) { return state }
+var handler = function (state, action) { return state }
 
 describe('sketch: default exports', function () {
   var state = sketch({
@@ -11,10 +12,15 @@ describe('sketch: default exports', function () {
     action2: ['Prefix/action2'],
     action3: ['Prefix/action3', 'payload'],
     action4: ['Prefix/action4', ['payload']],
-    action5: ['Prefix/action5', ['payload1', 'payload2']]
+    action5: ['Prefix/action5', ['payload1', 'payload2']],
+    action6: function () {
+      return function (dispatch) {
+        return new Promise(function (resolve) {})
+      }
+    }
   }, {
     CONST: null,
-    STATE: handler,
+    STATE: reducer,
     state0: {
       value: 'initial-state1'
     },
@@ -34,7 +40,7 @@ describe('sketch: default exports', function () {
       }
     },
     state4: {
-      initialValue: 'initial-state4',
+      value: 'initial-state4',
       reducer: handler
     }
   })
@@ -43,6 +49,7 @@ describe('sketch: default exports', function () {
     assert.equal(typeof state.initialValue, 'object', 'initialValue is missing')
     assert.equal(typeof state.ActionTypes, 'object', 'ActionTypes is missing')
     assert.equal(typeof state.Actions, 'object', 'Actions is missing')
+    assert.equal(typeof state.Actions.action6, 'function', 'side-effecting action is missing')
     assert.equal(typeof state.reducer, 'function', 'reducer is missing')
   })
 })
