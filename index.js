@@ -117,14 +117,14 @@ sketch.combine = function (states) {
   var initialValue = Object.create(null)
   var reducers = {}
   var keys = Object.getOwnPropertyNames(states)
+  var combinedState = Object.create(null)
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
+    combinedState[key] = states[key]
     initialValue[key] = states[key].initialValue
     reducers[key] = states[key].reducer
   }
-  // assembly a new composite state.
-  var combinedState = Object.create(null)
-  combinedState.States = states
+  // assembly the new composite state.
   combinedState.initialValue = initialValue
   combinedState.reducer = redux.combineReducers(reducers)
   return combinedState

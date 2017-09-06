@@ -99,9 +99,8 @@ describe('sketch.combine', function () {
       state2: state2
     })
     assert.equal(typeof state, 'object', 'state is not an object')
-    assert.equal(typeof state.States, 'object', 'initialValue is invalid')
-    assert.equal(state.States.state1, state1, 'sub-state1 is invalid')
-    assert.equal(state.States.state2, state2, 'sub-state2 is invalid')
+    assert.equal(state.state1, state1, 'sub-state1 is invalid')
+    assert.equal(state.state2, state2, 'sub-state2 is invalid')
     assert.equal(typeof state.initialValue, 'object', 'initialValue is invalid')
     assert.equal(typeof state.reducer, 'function', 'reducer is invalid')
   })
