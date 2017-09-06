@@ -1,6 +1,6 @@
 {
   "name": "redux-sketch",
-  "version": "0.4.7",
+  "version": "0.5.2",
   "description": "A redux state sketcher to generate a state definition with initial state, action types, action creators and reducer.",
   "main": "index.js",
   "scripts": {

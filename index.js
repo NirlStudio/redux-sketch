@@ -37,17 +37,20 @@ function createSketching (actions) {
   return sketching
 }
 
-function createReducer (actions, initValue, binding) {
+function createReducer (actionPlan, initValue, binding) {
   if (!binding) {
-    return actions.nop(initValue)
-  } else if (binding.length) { // an array of action name(s) and a handler
-    var last = binding.length - 1
-    return typeof binding[last] === 'function'
-      ? actions.bind(binding.slice(0, last), binding[last], initValue)
-      : actions.bind(binding, null, initValue)
-  } else { // a map object of action-name to its handler
-    return actions.combine(binding, initValue)
+    return actionPlan.nop(initValue)
   }
+  // try to find out bound actions
+  var names = Object.getOwnPropertyNames(binding)
+  var handlers = {}
+  for (var i = 0; i < names.length; i++) {
+    var name = names[i]
+    if (typeof binding[name] === 'function') {
+      handlers[name] = binding[name]
+    }
+  }
+  return actionPlan.combine(handlers, initValue)
 }
 
 function createReducers (sketching, state) {
@@ -56,26 +59,24 @@ function createReducers (sketching, state) {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
     var substate = state[key]
-    if (!substate) { // a constant state.
-      sketching.initialValue[key] = null
-      reducers[key] = sketching.actionPlan.nop()
-    } else if (typeof substate === 'function') {
-      // a customized reducer is provided.
-      sketching.initialValue[key] = null
+    var initValue = null
+    if (typeof substate === 'function') {
+      // a customized state reducer.
       reducers[key] = substate
-    } else if (
-      typeof substate.initialValue !== 'undefined' &&
-      typeof substate.reducer === 'function'
-    ) { // a nested state object.
-      sketching.initialValue[key] = substate.initialValue
-      reducers[key] = substate.reducer
+    } else if (!substate || typeof substate !== 'object') {
+      // a constant state.
+      initValue = typeof substate !== 'undefined' ? substate : null
+      reducers[key] = sketching.actionPlan.nop(initValue)
     } else { // take as a descriptor object
-      var initValue = typeof substate.value === 'undefined' ? null : substate.value
-      sketching.initialValue[key] = initValue
-      reducers[key] = typeof substate.bind === 'function'
-        ? substate.bind // a customized reducer
-        : createReducer(sketching.actionPlan, initValue, substate.bind)
+      initValue = typeof substate.initialValue !== 'undefined'
+        ? substate.initialValue : null
+      reducers[key] = typeof substate.reducer === 'function'
+        // found a customized reducer.
+        ? substate.reducer
+        // create reducer by bound actions.
+        : createReducer(sketching.actionPlan, initValue, substate)
     }
+    sketching.initialValue[key] = initValue
   }
   return reducers
 }

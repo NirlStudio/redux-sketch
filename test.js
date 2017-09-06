@@ -19,29 +19,23 @@ describe('sketch: default exports', function () {
       }
     }
   }, {
-    CONST: null,
-    STATE: reducer,
-    state0: {
-      value: 'initial-state1'
-    },
-    state1: {
-      value: 'initial-state1',
-      bind: handler
-    },
-    state2: {
-      value: 'initial-state2',
-      bind: ['action1', 'action2', handler]
+    state0: 'initial-state0', // constant state.
+    state1: reducer, // initial value will be null.
+    state2: { // constant state
+      initialValue: 'initial-state2'
     },
     state3: {
-      value: 'initial-state3',
-      bind: {
-        action1: handler,
-        action2: handler
-      }
+      // initialValue: null,
+      action1: handler
     },
     state4: {
-      value: 'initial-state4',
-      reducer: handler
+      initialValue: 'initial-state4',
+      action2: handler,
+      action3: handler
+    },
+    state5: {
+      initialValue: 'initial-state5',
+      reducer: reducer
     }
   })
   it('should return a state descriptor', function () {
@@ -78,11 +72,12 @@ describe('sketch.combine', function () {
     }, {
       state1: {
         value: 'initial-state1',
-        bind: handler
+        reducer: handler
       },
       state2: {
         value: 'initial-state2',
-        bind: ['action1', 'action2', handler]
+        action1: handler,
+        action2: handler
       }
     })
     var state2 = sketch({
@@ -90,12 +85,13 @@ describe('sketch.combine', function () {
       action2: 'state2/action2'
     }, {
       state1: {
-        value: 'initial-state1',
-        bind: handler
+        initialValue: 'initial-state1',
+        reducer: handler
       },
       state2: {
-        value: 'initial-state2',
-        bind: ['action1', 'action2', handler]
+        initialValue: 'initial-state2',
+        action1: handler,
+        action2: handler
       }
     })
     var state = sketch.combine({
