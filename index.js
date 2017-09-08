@@ -27,7 +27,7 @@ function bindReducer (sketching, reducer) {
       sketching._sketchingParent = this instanceof Sketching &&
         this !== sketching ? this : null
     }
-    return reducer(state, action)
+    return (sketching._sketchingState = reducer(state, action))
   }
 }
 
