@@ -70,11 +70,12 @@ function createReducers (sketching, state) {
     } else { // take as a descriptor object
       initValue = typeof substate.initialValue !== 'undefined'
         ? substate.initialValue : null
-      reducers[key] = typeof substate.reducer === 'function'
-        // found a customized reducer.
-        ? substate.reducer
-        // create reducer by bound actions.
-        : createReducer(sketching.actionPlan, initValue, substate)
+      if (typeof substate.reducer === 'function') {
+        sketching[key] = substate
+        reducers[key] = substate.reducer
+      } else {
+        reducers[key] = createReducer(sketching.actionPlan, initValue, substate)
+      }
     }
     sketching.initialValue[key] = initValue
   }
