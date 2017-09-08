@@ -3,8 +3,36 @@
 var redux = require('redux')
 var plan = require('redux-action-plan')
 
+function Sketching () {}
+Sketching.prototype = Object.create(null)
+Sketching.prototype.getState = function () {
+  return this._sketchingState
+}
+Sketching.prototype.getParent = function () {
+  return this._sketchingParent
+}
+Sketching.prototype.getRoot = function () {
+  return this._sketchingParent ? this._sketchingParent.getRoot() : this
+}
+Sketching.prototype.getRootState = function () {
+  return this.getRoot().getState()
+}
+
+function bindReducer (sketching, reducer) {
+  sketching.reducer = function (state, action) {
+    // save the whole, but maybe not a root, state.
+    sketching._sketchingState = state
+    // try to check the existence of a parent sketched state once.
+    if (typeof sketching._sketchingParent === 'undefined') {
+      sketching._sketchingParent = this instanceof Sketching &&
+        this !== sketching ? this : null
+    }
+    return reducer(state, action)
+  }
+}
+
 function createSketching (actions) {
-  var sketching = Object.create(null)
+  var sketching = new Sketching()
   // Types: mapping of (action-name, action-type-value)
   sketching.ActionTypes = Object.create(null)
   var payloads = {}
@@ -34,12 +62,13 @@ function createSketching (actions) {
 
   // Actions: action creators
   sketching.Actions = sketching.actionPlan(payloads)
+
   return sketching
 }
 
-function createReducer (actionPlan, initValue, binding) {
+function createReducer (sketching, initValue, binding) {
   if (!binding) {
-    return actionPlan.nop(initValue)
+    return sketching.actionPlan.nop(initValue)
   }
   // try to find out bound actions
   var names = Object.getOwnPropertyNames(binding)
@@ -47,10 +76,10 @@ function createReducer (actionPlan, initValue, binding) {
   for (var i = 0; i < names.length; i++) {
     var name = names[i]
     if (typeof binding[name] === 'function') {
-      handlers[name] = binding[name]
+      handlers[name] = binding[name].bind(sketching)
     }
   }
-  return actionPlan.combine(handlers, initValue)
+  return sketching.actionPlan.combine(handlers, initValue)
 }
 
 function createReducers (sketching, state) {
@@ -62,7 +91,7 @@ function createReducers (sketching, state) {
     var initValue = null
     if (typeof substate === 'function') {
       // a customized state reducer.
-      reducers[key] = substate
+      reducers[key] = substate.bind(sketching)
     } else if (!substate || typeof substate !== 'object') {
       // a constant state.
       initValue = typeof substate !== 'undefined' ? substate : null
@@ -72,9 +101,9 @@ function createReducers (sketching, state) {
         ? substate.initialValue : null
       if (typeof substate.reducer === 'function') {
         sketching[key] = substate
-        reducers[key] = substate.reducer
+        reducers[key] = substate.reducer.bind(sketching)
       } else {
-        reducers[key] = createReducer(sketching.actionPlan, initValue, substate)
+        reducers[key] = createReducer(sketching, initValue, substate)
       }
     }
     sketching.initialValue[key] = initValue
@@ -90,7 +119,7 @@ function sketch (actions, state) {
   // reducer
   var reducers = createReducers(sketching, state)
   // create final reducer
-  sketching.reducer = redux.combineReducers(reducers)
+  bindReducer(sketching, redux.combineReducers(reducers))
   return sketching
 }
 
@@ -115,20 +144,30 @@ sketch.actions = function (prefix, actions) {
 
 sketch.combine = function (states) {
   // merge initial state and reducers
+  var sketching = new Sketching()
   var initialValue = Object.create(null)
   var reducers = {}
   var keys = Object.getOwnPropertyNames(states)
-  var combinedState = Object.create(null)
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i]
-    combinedState[key] = states[key]
-    initialValue[key] = states[key].initialValue
-    reducers[key] = states[key].reducer
+    var substate = states[key]
+    if (typeof substate === 'function') {
+      // accept a reducer to handle the sub-state.
+      initialValue[key] = null
+      reducers[key] = substate.bind(sketching)
+    } else { // take as a nested sketch state.
+      sketching[key] = substate
+      initialValue[key] = typeof substate.initialValue !== 'undefined'
+        ? substate.initialValue : null
+      reducers[key] = substate.reducer
+        ? substate.reducer.bind(sketching)
+        : plan.nopReducer(initialValue[key])
+    }
   }
   // assembly the new composite state.
-  combinedState.initialValue = initialValue
-  combinedState.reducer = redux.combineReducers(reducers)
-  return combinedState
+  sketching.initialValue = initialValue
+  bindReducer(sketching, redux.combineReducers(reducers))
+  return sketching
 }
 
 module.exports = sketch

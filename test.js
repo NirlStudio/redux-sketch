@@ -3,8 +3,8 @@
 var assert = require('assert')
 var sketch = require('./index')
 
-var reducer = function (state, action) { return state }
-var handler = function (state, action) { return state }
+var reducer = function (state, action) { return state || null }
+var handler = function (state, action) { return state || null }
 
 describe('sketch: default exports', function () {
   var state = sketch({
@@ -96,7 +96,10 @@ describe('sketch.combine', function () {
     })
     var state = sketch.combine({
       state1: state1,
-      state2: state2
+      state2: state2,
+      state3: function (state, action) {
+        return state || null
+      }
     })
     assert.equal(typeof state, 'object', 'state is not an object')
     assert.equal(state.state1, state1, 'sub-state1 is invalid')
@@ -105,5 +108,24 @@ describe('sketch.combine', function () {
     assert.equal(typeof state.state2.state1, 'object', 'sub-state2.state1 is invalid')
     assert.equal(typeof state.initialValue, 'object', 'initialValue is invalid')
     assert.equal(typeof state.reducer, 'function', 'reducer is invalid')
+    assert.equal(state.state3, null, 'state3 is a simple state')
+
+    var initState = {
+      state1: {
+        state1: 'state-value1',
+        state2: 'state-value2'
+      },
+      state2: {
+        state1: 'state-value3',
+        state2: 'state-value4'
+      }
+    }
+    state.reducer(initState)
+    assert.equal(state._sketchingState, initState, 'root state\'s state is invalid')
+    assert.equal(state._sketchingParent, null, 'root state\'s parent is invalid')
+    assert.equal(state.state1._sketchingState, initState.state1, 'sub-state1\'s state is invalid')
+    assert.equal(state.state1._sketchingParent, state, 'sub-state1\'s parent is invalid')
+    assert.equal(state.state2._sketchingState, initState.state2, 'sub-state2\'s state is invalid')
+    assert.equal(state.state2._sketchingParent, state, 'sub-state2\'s parent is invalid')
   })
 })
